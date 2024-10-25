@@ -1,0 +1,16 @@
+class GanttChart:
+    def __init__(self):
+        self.data = None
+
+    def create_data_for_display(self):
+        # データを作成する処理をここに記述
+        self.data = "ガントチャートのデータ"
+
+    def view_gantt_chart(self):
+        # データを表示する処理をここに記述
+        print(self.data)
+
+# 使用例
+gantt_chart = GanttChart()
+gantt_chart.create_data_for_display()
+gantt_chart.view_gantt_chart()
