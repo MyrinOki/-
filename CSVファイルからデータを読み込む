@@ -1,0 +1,51 @@
+import csv
+from collections import defaultdict
+
+def read_initial_schedule(file_path):
+    ignore_char = '#'
+    sep_cr = '\n'
+    sep_com = ','
+
+    result_dict = defaultdict(dict)
+    
+    with open(file_path, 'r', encoding='utf-8') as file:
+        reader = csv.reader(file, delimiter=sep_com)
+        for row in reader:
+            if row[0] == ignore_char:
+                continue
+            if row[0] == '<JOB>':
+                job_name = row[1]
+                result_dict[job_name] = {
+                    'dueDate': int(row[2]),
+                    'processPlan': [],
+                    'previousProcess': 'S'
+                }
+                for i in range(3, len(row), 2):
+                    process = {
+                        'Resource': row[i],
+                        'processingTime': int(row[i + 1])
+                    }
+                    result_dict[job_name]['processPlan'].append(process)
+            elif row[0] == '<RESOURCE>':
+                resource_name = row[1]
+                result_dict[resource_name] = {
+                    'resourceList': row[2:]
+                }
+            elif row[0] == '<DISTANCE>':
+                origin = row[1]
+                destination = row[2]
+                distance = int(row[3])
+                od_name = f"od{origin}{destination}"
+                result_dict[od_name] = {
+                    'origin': origin,
+                    'destination': destination,
+                    'distance': distance
+                }
+
+    print(f"{file_path}からスケジュールデータを読み込みました")
+    return result_dict
+
+# 使用例
+file_path = 'path_to_your_csv_file.csv'
+result = read_initial_schedule(file_path)
+print(result)
