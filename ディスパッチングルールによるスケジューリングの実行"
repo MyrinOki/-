@@ -1,0 +1,30 @@
+class Scheduler:
+    def __init__(self):
+        self.job_dictionary = {}
+
+    def pick_up_candidate(self):
+        # 候補をピックアップするロジックを実装
+        pass
+
+    def select_next_operation(self, candidate, rule):
+        # 次の操作を選択するロジックを実装
+        pass
+
+    def allocate_operation(self, selection):
+        # 操作を割り当てるロジックを実装
+        pass
+
+    def scheduling_by_dr_with(self, rule):
+        if rule is not None:
+            self.rule = rule
+            while self.job_dictionary:
+                candidate = self.pick_up_candidate()
+                selection = self.select_next_operation(candidate, rule)
+                self.allocate_operation(selection)
+        else:
+            raise ValueError('ルールを選択してください')
+
+# 使用例
+scheduler = Scheduler()
+rule = 'your_rule'  # 具体的なルールをここに指定
+scheduler.scheduling_by_dr_with(rule)
