@@ -1,0 +1,21 @@
+class GanttChart:
+    def __init__(self):
+        self.resource_dict = {}
+
+def show_result_in_transcript(gantt_chart):
+    resources = sorted(gantt_chart.resource_dict.keys())
+
+    print("\n\n")
+    for resource in resources:
+        operations = gantt_chart.resource_dict[resource]
+        print(f"{resource}\t", end="")
+        for op in operations.get('operations', []):
+            print(f"{op['jobName']}\t", end="")
+        print("\n")
+
+# 使用例
+gantt_chart = GanttChart()
+# ここで `gantt_chart.resource_dict` を適切に設定する必要があります。
+# 例: gantt_chart.resource_dict = {'resource1': {'operations': [{'jobName': 'Job1'}, {'jobName': 'Job2'}]}, 'resource2': {'operations': [{'jobName': 'Job3'}]}}
+
+show_result_in_transcript(gantt_chart)
