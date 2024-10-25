@@ -1,0 +1,31 @@
+class GanttChart:
+    def __init__(self):
+        self.resource_dict = {}
+
+    def initialize(self):
+        self.resource_dict.clear()
+
+def prepare_gantt_chart(gantt_chart, resource_dictionary):
+    gantt_chart.initialize()
+    resource_set = set()
+
+    for resources in resource_dictionary.values():
+        resource_list = resources.get('resourceList', [])
+        for resource in resource_list:
+            resource_set.add(resource)
+
+    for resource in resource_set:
+        resource_information = {
+            'finishTime': 0,
+            'operations': []
+        }
+        gantt_chart.resource_dict[resource] = resource_information
+
+# 使用例
+gantt_chart = GanttChart()
+resource_dictionary = {
+    'resource1': {'resourceList': ['resA', 'resB']},
+    'resource2': {'resourceList': ['resC']}
+}
+prepare_gantt_chart(gantt_chart, resource_dictionary)
+print(gantt_chart.resource_dict)
