@@ -1,0 +1,51 @@
+from collections import defaultdict, OrderedDict
+
+class GanttChart:
+    def __init__(self):
+        self.resource_dict = {}
+        self.present_time = 0
+
+    def add_resource(self, resource, finish_time, operations):
+        self.resource_dict[resource] = {'finishTime': finish_time, 'operations': operations}
+
+class Scheduler:
+    def __init__(self, gantt_chart, job_dictionary):
+        self.gantt_chart = gantt_chart
+        self.job_dictionary = job_dictionary
+
+    def pick_up_candidate(self):
+        working_operations = []
+        
+        # 加工中のオペレーションを選択肢から除外する
+        for resource, value in self.gantt_chart.resource_dict.items():
+            if self.gantt_chart.present_time < value['finishTime']:
+                working_operations.append(value['operations'][-1]['jobName'])
+
+        candidate_dictionary = defaultdict(list)
+
+        # 候補の選択
+        for resource, element in self.gantt_chart.resource_dict.items():
+            if self.gantt_chart.present_time >= element['finishTime']:
+                for job, value in self.job_dictionary.items():
+                    if job not in working_operations:
+                        if value['processPlan'][0]['Resource'] == resource:
+                            candidate_dictionary[resource].append(job)
+
+        return candidate_dictionary
+
+# 使用例
+gantt_chart = GanttChart()
+gantt_chart.add_resource('Resource1', 10, [{'jobName': 'Job1'}, {'jobName': 'Job2'}])
+gantt_chart.add_resource('Resource2', 5, [{'jobName': 'Job3'}])
+gantt_chart.present_time = 6
+
+job_dictionary = {
+    'Job1': {'processPlan': [{'Resource': 'Resource1'}]},
+    'Job2': {'processPlan': [{'Resource': 'Resource1'}]},
+    'Job3': {'processPlan': [{'Resource': 'Resource2'}]},
+    'Job4': {'processPlan': [{'Resource': 'Resource1'}]},
+}
+
+scheduler = Scheduler(gantt_chart, job_dictionary)
+candidates = scheduler.pick_up_candidate()
+print(candidates)
