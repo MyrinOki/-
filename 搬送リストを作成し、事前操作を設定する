@@ -1,0 +1,59 @@
+class Operation:
+    def __init__(self, job_name, resource_name):
+        self.job_name = job_name
+        self.resource_name = resource_name
+        self.preceding_operation = None
+
+    def set_preceding_operation(self, prev_op):
+        self.preceding_operation = prev_op
+
+class GanttChart:
+    def __init__(self):
+        self.resource_dict = {}
+        self.transportation_dict = {}
+
+    def add_resource(self, resource, operations):
+        self.resource_dict[resource] = {'operations': operations}
+
+    def prepare_transporation_dictionary(self):
+        job_list = set()
+        operation_list = []
+
+        for resource, data in self.resource_dict.items():
+            for op in data['operations']:
+                job_list.add(op.job_name)
+                operation_list.append(op)
+
+        sorted_job_list = sorted(job_list)
+
+        for job in sorted_job_list:
+            selected_operations = [op for op in operation_list if op.job_name == job]
+            selected_operations.sort(key=lambda op: op.resource_name)
+            self.transportation_dict[job] = selected_operations
+
+        for ops in self.transportation_dict.values():
+            for i in range(1, len(ops)):
+                ops[i].set_preceding_operation(ops[i - 1])
+
+        for resource, data in self.resource_dict.items():
+            for target_op in data['operations']:
+                for ops in self.transportation_dict.values():
+                    for op in ops:
+                        if target_op.job_name == op.job_name and target_op.resource_name == op.resource_name:
+                            target_op.set_preceding_operation(op.preceding_operation)
+
+# 使用例
+operations1 = [Operation('Job1', 'ResourceA'), Operation('Job2', 'ResourceA')]
+operations2 = [Operation('Job3', 'ResourceB'), Operation('Job4', 'ResourceB')]
+gantt_chart = GanttChart()
+gantt_chart.add_resource('ResourceA', operations1)
+gantt_chart.add_resource('ResourceB', operations2)
+
+gantt_chart.prepare_transporation_dictionary()
+
+# 結果を確認
+for job, ops in gantt_chart.transportation_dict.items():
+    print(f"Job: {job}")
+    for op in ops:
+        prev_op = op.preceding_operation.job_name if op.preceding_operation else "None"
+        print(f"  Operation: Resource={op.resource_name}, Previous Operation={prev_op}")
