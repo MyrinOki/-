@@ -1,0 +1,31 @@
+def select_operations(candidate_dictionary, a_rule):
+    selected_operations_dictionary = {}
+
+    for resource, value in candidate_dictionary.items():
+        if value:
+            selected_operations = adopt_rule(value, resource, a_rule)
+            value.remove(selected_operations[0])
+            
+            for temp_value in candidate_dictionary.values():
+                if temp_value and selected_operations[0] in temp_value:
+                    temp_value.remove(selected_operations[0])
+            
+            selected_operations_dictionary[resource] = selected_operations[0]
+
+    return selected_operations_dictionary
+
+def adopt_rule(value, resource, a_rule):
+    # ルールに基づいて選択するロジックを実装
+    # ここでは仮にリストの先頭要素を返すようにしています
+    return [value[0]]
+
+# 使用例
+candidate_dictionary = {
+    'Resource1': ['Op1', 'Op2'],
+    'Resource2': ['Op3', 'Op4'],
+    'Resource3': ['Op1', 'Op5']
+}
+a_rule = 'your_rule'  # 具体的なルールをここに指定
+
+selected_operations = select_operations(candidate_dictionary, a_rule)
+print(selected_operations)
