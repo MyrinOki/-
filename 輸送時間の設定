@@ -1,0 +1,82 @@
+class Operation:
+    def __init__(self, job_name, resource_name, starting_time):
+        self.job_name = job_name
+        self.resource_name = resource_name
+        self.starting_time = starting_time
+        self.transportation_time = None
+
+    def set_transportation_time(self, transportation_time):
+        self.transportation_time = transportation_time
+
+class GanttChart:
+    def __init__(self):
+        self.resource_dict = {}
+        self.transportation_dict = {}
+
+    def add_resource(self, resource, operations):
+        self.resource_dict[resource] = {'operations': operations}
+
+    def add_transportation_info(self, job_name, operations):
+        self.transportation_dict[job_name] = operations
+
+def calculate_transportation_time(gantt_chart, distance_dict, amr_dict):
+    operations = []
+
+    for resource, data in gantt_chart.resource_dict.items():
+        operations.extend(data['operations'])
+
+    operations.sort(key=lambda op: op.starting_time)
+
+    for op in operations:
+        current_job = gantt_chart.transportation_dict[op.job_name]
+        process_number = current_job.index(op)
+        if process_number == 0:
+            origin = 'S'
+            destination = op.resource_name
+        else:
+            origin = current_job[process_number - 1].resource_name
+            destination = op.resource_name
+
+        distance = None
+        for od_num, data in distance_dict.items():
+            if data['origin'] == origin and data['destination'] == destination:
+                distance = data['distance']
+                break
+
+        amr = None
+        for amr_name, data in amr_dict.items():
+            if data['origin'] == origin:
+                amr = amr_name
+                break
+
+        if distance is not None and amr is not None:
+            transportation_time = distance * amr_dict[amr]['speed']
+            op.set_transportation_time(transportation_time)
+
+# 使用例
+gantt_chart = GanttChart()
+operations1 = [Operation('Job1', 'ResourceA', 1), Operation('Job1', 'ResourceB', 3)]
+operations2 = [Operation('Job2', 'ResourceC', 2)]
+
+gantt_chart.add_resource('ResourceA', operations1)
+gantt_chart.add_resource('ResourceB', operations2)
+gantt_chart.add_transportation_info('Job1', operations1)
+gantt_chart.add_transportation_info('Job2', operations2)
+
+distance_dict = {
+    'od1': {'origin': 'S', 'destination': 'ResourceA', 'distance': 5},
+    'od2': {'origin': 'ResourceA', 'destination': 'ResourceB', 'distance': 10},
+    'od3': {'origin': 'S', 'destination': 'ResourceC', 'distance': 15}
+}
+
+amr_dict = {
+    'AMR1': {'origin': 'S', 'speed': 2},
+    'AMR2': {'origin': 'ResourceA', 'speed': 3}
+}
+
+calculate_transportation_time(gantt_chart, distance_dict, amr_dict)
+
+# 結果を確認
+for resource, data in gantt_chart.resource_dict.items():
+    for op in data['operations']:
+        print(f"Operation: {op.job_name}, Resource: {op.resource_name}, Starting Time: {op.starting_time}, Transportation Time: {op.transportation_time}")
