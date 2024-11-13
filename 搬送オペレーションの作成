@@ -1,0 +1,73 @@
+class Operation:
+    def __init__(self, job_name, resource_name, starting_time, processing_time):
+        self.job_name = job_name
+        self.resource_name = resource_name
+        self.starting_time = starting_time
+        self.processing_time = processing_time
+        self.finishing_time = starting_time + processing_time
+        self.transportation_time = None
+
+    def set_transportation_time(self, transportation_time):
+        self.transportation_time = transportation_time
+        self.starting_time -= transportation_time
+        self.finishing_time = self.starting_time + self.processing_time
+
+class GanttChart:
+    def __init__(self):
+        self.resource_dict = {}
+        self.amr_dict = {}
+
+    def add_resource(self, resource, operations):
+        self.resource_dict[resource] = {'operations': operations}
+
+    def update_resource_dict(self):
+        temp_resource_dict = {amr: {'finishingTime': None, 'operations': []} for amr in self.amr_dict.keys()}
+
+        for resource, data in self.resource_dict.items():
+            for operation in data['operations']:
+                amr_operation = Operation(
+                    job_name=operation.job_name,
+                    resource_name=operation.resource_name,
+                    starting_time=operation.starting_time - operation.transportation_time,
+                    processing_time=operation.transportation_time
+                )
+                amr_operation.finishing_time = operation.starting_time
+
+                for amr, amr_data in self.amr_dict.items():
+                    if amr_data['destination'] == operation.resource_name[0]:
+                        amr_operation.resource_name = amr
+                        break
+
+                temp_resource_dict[amr_operation.resource_name]['operations'].append(amr_operation)
+
+        for amr, data in temp_resource_dict.items():
+            self.resource_dict[amr] = data
+
+# 使用例
+gantt_chart = GanttChart()
+
+# リソースとオペレーションの追加（例）
+operations1 = [
+    Operation('Job1', 'ResourceA', 10, 5),
+    Operation('Job2', 'ResourceA', 20, 10)
+]
+operations2 = [
+    Operation('Job3', 'ResourceB', 15, 8)
+]
+gantt_chart.add_resource('ResourceA', operations1)
+gantt_chart.add_resource('ResourceB', operations2)
+
+# AMR辞書の追加
+gantt_chart.amr_dict = {
+    'AMR1': {'destination': 'ResourceA'},
+    'AMR2': {'destination': 'ResourceB'}
+}
+
+# 一時辞書の更新
+gantt_chart.update_resource_dict()
+
+# 結果を確認
+for resource, data in gantt_chart.resource_dict.items():
+    print(f"Resource: {resource}")
+    for op in data['operations']:
+        print(f"  Operation: {op.job_name}, Start={op.starting_time}, Finish={op.finishing_time}, Resource={op.resource_name}")
