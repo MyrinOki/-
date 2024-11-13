@@ -1,0 +1,43 @@
+class Operation:
+    def __init__(self, starting_time, processing_time):
+        self.starting_time = starting_time
+        self.processing_time = processing_time
+        self.finishing_time = None
+        self.previous_operation = None
+
+    def calculate_finishing_time(self):
+        self.finishing_time = self.starting_time + self.processing_time
+
+    def set_previous_operation(self, previous_op):
+        self.previous_operation = previous_op
+
+class GanttChart:
+    def __init__(self):
+        self.resource_dict = {}
+
+    def add_resource(self, resource, operations):
+        self.resource_dict[resource] = {'operations': operations}
+
+    def update_operations(self):
+        for resource, data in self.resource_dict.items():
+            for op in data['operations']:
+                op.calculate_finishing_time()
+            for i in range(1, len(data['operations'])):
+                data['operations'][i].set_previous_operation(data['operations'][i - 1])
+
+# 使用例
+operations1 = [Operation(0, 5), Operation(5, 10), Operation(15, 20)]
+operations2 = [Operation(0, 8), Operation(8, 6)]
+
+gantt_chart = GanttChart()
+gantt_chart.add_resource('Resource1', operations1)
+gantt_chart.add_resource('Resource2', operations2)
+
+gantt_chart.update_operations()
+
+# 結果を確認
+for resource, data in gantt_chart.resource_dict.items():
+    print(f"Resource: {resource}")
+    for op in data['operations']:
+        prev_op = op.previous_operation.starting_time if op.previous_operation else "None"
+        print(f"Operation: Start={op.starting_time}, Process={op.processing_time}, Finish={op.finishing_time}, Previous Operation Start={prev_op}")
