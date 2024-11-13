@@ -1,0 +1,63 @@
+class Operation:
+    def __init__(self, job_name, resource_name, starting_time, processing_time, transportation_time):
+        self.job_name = job_name
+        self.resource_name = resource_name
+        self.starting_time = starting_time
+        self.processing_time = processing_time
+        self.transportation_time = transportation_time
+        self.finishing_time = starting_time + processing_time
+        self.previous_operation = None
+        self.preceding_operation = None
+
+    def update_times(self):
+        if self.previous_operation is None and self.preceding_operation is None:
+            self.starting_time += self.transportation_time
+            self.finishing_time = self.starting_time + self.processing_time
+        elif self.previous_operation is None and self.preceding_operation is not None:
+            if self.starting_time < (self.preceding_operation.finishing_time + self.transportation_time):
+                self.starting_time = self.preceding_operation.finishing_time + self.transportation_time
+                self.finishing_time = self.starting_time + self.processing_time
+        elif self.previous_operation is not None and self.preceding_operation is None:
+            if self.previous_operation.finishing_time + self.transportation_time > self.starting_time:
+                self.starting_time = self.previous_operation.finishing_time + self.transportation_time
+                self.finishing_time = self.starting_time + self.processing_time
+        else:
+            preceding_finishing_time = self.preceding_operation.finishing_time + self.transportation_time
+            previous_finishing_time = self.previous_operation.finishing_time
+            if preceding_finishing_time > previous_finishing_time:
+                self.starting_time = preceding_finishing_time
+            else:
+                self.starting_time = previous_finishing_time
+            self.finishing_time = self.starting_time + self.processing_time
+
+class GanttChart:
+    def __init__(self):
+        self.resource_dict = {}
+
+    def add_resource(self, resource, operations):
+        self.resource_dict[resource] = {'operations': operations}
+
+    def update_operations(self):
+        for resource, data in self.resource_dict.items():
+            for operation in data['operations']:
+                operation.update_times()
+
+# 使用例
+operations1 = [
+    Operation('Job1', 'ResourceA', 0, 5, 1),
+    Operation('Job2', 'ResourceA', 6, 10, 2)
+]
+operations2 = [
+    Operation('Job3', 'ResourceB', 0, 8, 1)
+]
+
+gantt_chart = GanttChart()
+gantt_chart.add_resource('ResourceA', operations1)
+gantt_chart.add_resource('ResourceB', operations2)
+
+gantt_chart.update_operations()
+
+# 結果を確認
+for resource, data in gantt_chart.resource_dict.items():
+    for op in data['operations']:
+        print(f"Operation: {op.job_name}, Start={op.starting_time}, Finish={op.finishing_time}, Resource={op.resource_name}")
