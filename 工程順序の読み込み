@@ -1,15 +1,19 @@
-class ProcessDictionaryMaker:
+class ScheduleProcessor:
     def __init__(self, schedule_data):
         self.job_dictionary = {}
         self.resource_dictionary = {}
         self.distance_dictionary = {}
+        self.amr_dictionary = {}
         self.schedule_data = schedule_data
 
     def make_process_dictionary(self):
         for key, data in self.schedule_data.items():
-            if key[0] == 'J':
+            key_str = str(key)
+            if key_str.find('AMR') == 0:
+                self.amr_dictionary[key] = data
+            elif key_str[0] == 'J':
                 self.job_dictionary[key] = data
-            elif key[0] == 'o':
+            elif key_str[0] == 'o':
                 self.distance_dictionary[key] = data
             else:
                 self.resource_dictionary[key] = data
@@ -17,16 +21,16 @@ class ProcessDictionaryMaker:
 
 # 使用例
 schedule_data = {
-    # 'J'で始まるキーはジョブデータ
     'J1': 'ジョブデータ1',
-    # 'o'で始まるキーは距離データ
     'o1': '距離データ1',
-    # その他のキーはリソースデータ
+    'AMR1': 'AMRデータ1',
     'R1': 'リソースデータ1'
 }
-process_maker = ProcessDictionaryMaker(schedule_data)
-process_maker.make_process_dictionary()
 
-print("Job Dictionary:", process_maker.job_dictionary)
-print("Resource Dictionary:", process_maker.resource_dictionary)
-print("Distance Dictionary:", process_maker.distance_dictionary)
+processor = ScheduleProcessor(schedule_data)
+processor.make_process_dictionary()
+
+print("Job Dictionary:", processor.job_dictionary)
+print("Resource Dictionary:", processor.resource_dictionary)
+print("Distance Dictionary:", processor.distance_dictionary)
+print("AMR Dictionary:", processor.amr_dictionary)
