@@ -1,0 +1,73 @@
+class Operation:
+    def __init__(self, job_name, resource_name, processing_time, due_date, starting_time):
+        self.job_name = job_name
+        self.resource_name = resource_name
+        self.processing_time = processing_time
+        self.due_date = due_date
+        self.starting_time = starting_time
+        self.finishing_time = starting_time + processing_time
+
+    def update_finishing_time(self):
+        self.finishing_time = self.starting_time + self.processing_time
+
+class GanttChart:
+    def __init__(self):
+        self.resource_dict = {}
+        self.present_time = 0
+
+    def add_resource(self, resource):
+        self.resource_dict[resource] = {'operations': [], 'finishTime': 0}
+
+    def update_present_time(self):
+        processing_time_collection = set()
+        for resource, data in self.resource_dict.items():
+            if self.present_time < data['finishTime']:
+                processing_time_collection.add(data['finishTime'])
+        if processing_time_collection:
+            self.present_time = min(processing_time_collection)
+
+class Scheduler:
+    def __init__(self, gantt_chart, job_dictionary):
+        self.gantt_chart = gantt_chart
+        self.job_dictionary = job_dictionary
+
+    def create_operations(self, selection):
+        processing_time_collection = set()
+        
+        for resource, job in selection.items():
+            job_data = self.job_dictionary[job]
+            process_plan = job_data['processPlan'][0]
+            processing_time = process_plan['processingTime']
+            due_date = job_data['dueDate']
+
+            a_operation = Operation(job, resource, processing_time, due_date, self.gantt_chart.present_time)
+            self.gantt_chart.resource_dict[resource]['operations'].append(a_operation)
+            self.gantt_chart.resource_dict[resource]['finishTime'] = a_operation.finishing_time
+
+            job_data['previousProcess'] = resource
+            if len(job_data['processPlan']) == 1:
+                del self.job_dictionary[job]
+            else:
+                job_data['processPlan'].pop(0)
+
+        self.gantt_chart.update_present_time()
+
+# 使用例
+gantt_chart = GanttChart()
+gantt_chart.add_resource('Resource1')
+gantt_chart.add_resource('Resource2')
+
+job_dictionary = {
+    'Job1': {'processPlan': [{'processingTime': 5}], 'dueDate': 10},
+    'Job2': {'processPlan': [{'processingTime': 3}], 'dueDate': 8},
+}
+
+scheduler = Scheduler(gantt_chart, job_dictionary)
+selection = {'Resource1': 'Job1', 'Resource2': 'Job2'}
+scheduler.create_operations(selection)
+
+# 結果を確認
+for resource, data in gantt_chart.resource_dict.items():
+    print(f"Resource: {resource}")
+    for op in data['operations']:
+        print(f"  Operation: {op.job_name}, Start={op.starting_time}, Finish={op.finishing_time}")
